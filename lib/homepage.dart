@@ -27,44 +27,47 @@ class HomePage extends StatelessWidget {
             margin: EdgeInsets.all(8),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Detalhes da Agência ${agencia['agencia']}',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  _buildAgenciaDetails(agencia),
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TransferirScreen(
-                                  contaOrigem: agencia['conta'],
-                                  dados: dados,
-                                ),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text('Transferir',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.white)),
-                        ),
+                      Text(
+                        'Detalhes da Agência ${agencia['agencia']}',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
+                      SizedBox(height: 8),
+                      _buildAgenciaDetails(agencia),
                     ],
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransferirScreen(
+                            contaOrigem: agencia['conta'],
+                            dados: dados,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 16),
+                      child: Text(
+                        'Transferir',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
                   ),
                 ],
               ),
