@@ -1,5 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert'; // Importe esta linha para usar o jsonEncode
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Transferência',
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+      ),
+      home: TransferirScreen(contaOrigem: '123456789', dados: []),
+    );
+  }
+}
 
 class TransferirScreen extends StatelessWidget {
   final String contaOrigem;
@@ -50,12 +68,17 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://endereco_do_seu_servidor/realizar_transferencia'),
-        body: {
+        Uri.parse('http://localhost:5000/realizar_transferencia'),
+        headers: {
+          'Content-Type':
+              'application/json', // Adicione o cabeçalho Content-Type
+        },
+        body: jsonEncode({
+          // Use jsonEncode para codificar o corpo da requisição em JSON
           'conta_origem': widget.contaOrigem,
           'conta_destino': _contaDestino!,
           'valor': valorDigitado,
-        },
+        }),
       );
 
       if (response.statusCode == 200) {
