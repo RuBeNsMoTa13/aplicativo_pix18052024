@@ -17,12 +17,10 @@ def obter_dados(banco, agencia):
         return jsonify({'error': 'Banco não encontrado'}), 404
 
     db = dbs[banco]
-    collection = db[f'{banco}_ag{agencia}']  # Usando f-string para criar o nome da coleção dinamicamente
+    collection = db[f'{banco}_ag{agencia}']
 
-    # Obter dados da coleção selecionada
     dados = list(collection.find())
 
-    # Converter ObjectId para strings
     for item in dados:
         if '_id' in item:
             item['_id'] = str(item['_id'])
@@ -37,14 +35,31 @@ def realizar_transferencia():
     conta_destino = data.get('conta_destino')
     valor = data.get('valor')
 
-    # Verifica se as informações necessárias foram fornecidas
     if not conta_origem or not conta_destino or not valor:
         return jsonify({'error': 'Dados incompletos para realizar a transferência'}), 400
 
-    # Aqui você implementa a lógica para transferir o valor da conta de origem para a conta de destino
-    # Por exemplo, você pode buscar as informações das contas no banco de dados e realizar as operações necessárias
+    # Verifica se as contas existem no banco de dados
+    if conta_origem_existe(conta_origem) and conta_destino_existe(conta_destino):
+        # Realiza a transferência
+        transferir_valor(conta_origem, conta_destino, valor)
+        return jsonify({'message': 'Transferência realizada com sucesso'}), 200
+    else:
+        return jsonify({'error': 'Uma ou ambas as contas não existem'}), 404
 
-    return jsonify({'message': 'Transferência realizada com sucesso'}), 200
+def conta_origem_existe(conta_origem):
+    # Aqui você implementa a lógica para verificar se a conta de origem existe no banco de dados
+    # Por exemplo, pode ser uma consulta ao banco de dados para verificar a existência da conta
+    return True  # Simulando que a conta existe
+
+def conta_destino_existe(conta_destino):
+    # Aqui você implementa a lógica para verificar se a conta de destino existe no banco de dados
+    return True  # Simulando que a conta existe
+
+def transferir_valor(conta_origem, conta_destino, valor):
+    # Aqui você implementa a lógica para transferir o valor da conta de origem para a conta de destino
+    # Por exemplo, pode ser uma atualização dos saldos das contas no banco de dados
+    # Neste exemplo, apenas simulamos a transferência imprimindo as informações
+    print(f"Transferindo {valor} da conta {conta_origem} para a conta {conta_destino}")
 
 if __name__ == '__main__':
     app.run(debug=True)
