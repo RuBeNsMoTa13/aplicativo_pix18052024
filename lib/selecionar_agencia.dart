@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'agencias.dart';
-import 'homepage.dart';
 
 class SelecionarAgenciaScreen extends StatelessWidget {
   final String title;
@@ -42,6 +41,7 @@ class SelecionarAgenciaScreen extends StatelessWidget {
                         Navigator.pop(context);
                       },
                       dados: [],
+                      banco: 'itau',
                     ),
                   ),
                 );
@@ -65,7 +65,18 @@ class SelecionarAgenciaScreen extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navegação para o Bradesco
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AgenciasScreen(
+                      onAgenciaSelected: (agencia) {
+                        Navigator.pop(context);
+                      },
+                      dados: [],
+                      banco: 'bradesco',
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.deepPurple,
@@ -86,7 +97,18 @@ class SelecionarAgenciaScreen extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navegação para a Caixa
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AgenciasScreen(
+                      onAgenciaSelected: (agencia) {
+                        Navigator.pop(context);
+                      },
+                      dados: [],
+                      banco: 'caixa',
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.deepPurple,
@@ -107,7 +129,18 @@ class SelecionarAgenciaScreen extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navegação para o Santander
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AgenciasScreen(
+                      onAgenciaSelected: (agencia) {
+                        Navigator.pop(context);
+                      },
+                      dados: [],
+                      banco: 'santander',
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.deepPurple,
@@ -128,7 +161,18 @@ class SelecionarAgenciaScreen extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navegação para o Sicoob
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AgenciasScreen(
+                      onAgenciaSelected: (agencia) {
+                        Navigator.pop(context);
+                      },
+                      dados: [],
+                      banco: 'sicoob',
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.deepPurple,

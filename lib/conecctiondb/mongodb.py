@@ -3,12 +3,21 @@ from pymongo import MongoClient
 
 app = Flask(__name__)
 client = MongoClient('mongodb://localhost:27017/')
-db = client['itau']
+dbs = {
+    'itau': client['itau'],
+    'bradesco': client['bradesco'],
+    'caixa': client['caixa'],
+    'santander': client['santander'],
+    'sicoob': client['sicoob']
+}
 
-@app.route('/<int:agencia>/dados', methods=['GET'])
-def obter_dados(agencia):
-    # Determinar a coleção com base na agência
-    collection = db[f'itau_ag{agencia}']  # Usando f-string para criar o nome da coleção dinamicamente
+@app.route('/<string:banco>/<int:agencia>/dados', methods=['GET'])
+def obter_dados(banco, agencia):
+    if banco not in dbs:
+        return jsonify({'error': 'Banco não encontrado'}), 404
+
+    db = dbs[banco]
+    collection = db[f'{banco}_ag{agencia}']  # Usando f-string para criar o nome da coleção dinamicamente
 
     # Obter dados da coleção selecionada
     dados = list(collection.find())
