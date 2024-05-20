@@ -12,10 +12,14 @@ dbs = {
 }
 
 def conta_existe(db, conta):
-    # Verifica se a conta existe na coleção específica do Itaú com a agência 1
-    colecao = 'itau_ag1'
-    contas = db[colecao]
-    return contas.find_one({'conta': conta}) is not None
+    # Verifica se a conta existe em todas as agências de todos os bancos
+    for banco in dbs.values():
+        for agencia in range(1, 6):  # Considerando agências de 1 a 5
+            colecao = f'{db.name}_ag{agencia}'
+            contas = banco[colecao]
+            if contas.find_one({'conta': conta}):
+                return True
+    return False
 
 @app.route('/<string:banco>/<int:agencia>/dados', methods=['GET'])
 def obter_dados(banco, agencia):
@@ -47,11 +51,10 @@ def realizar_transferencia():
         if not conta_origem or not conta_destino or not valor:
             return jsonify({'error': 'Dados incompletos para realizar a transferência'}), 400
 
-        # Verifica se as contas existem no banco de dados
-        db = dbs['itau']  # Usando o banco de dados do Itaú para a transferência
-        if conta_existe(db, conta_origem) and conta_existe(db, conta_destino):
+        # Verifica se as contas existem em qualquer banco de dados
+        if conta_existe(dbs['itau'], conta_origem) and conta_existe(dbs['itau'], conta_destino):
             # Realiza a transferência
-            if transferir_valor(db, conta_origem, conta_destino, valor):
+            if transferir_valor(conta_origem, conta_destino, valor):
                 return jsonify({'message': 'Transferência realizada com sucesso'}), 200
             else:
                 return jsonify({'error': 'Erro ao transferir valores ou atualizar saldos'}), 500
@@ -61,39 +64,42 @@ def realizar_transferencia():
         print(f"Erro no servidor Flask: {e}")
         return jsonify({'error': 'Erro interno no servidor'}), 500
 
-def transferir_valor(db, conta_origem, conta_destino, valor):
+def transferir_valor(conta_origem, conta_destino, valor):
     try:
-        colecao = 'itau_ag1'
-        contas = db[colecao]
+        for db_name, db in dbs.items():
+            for agencia in range(1, 6):  # Considerando agências de 1 a 5
+                colecao = f'{db_name}_ag{agencia}'
+                contas = db[colecao]
 
-        # Convertendo o valor para float
-        valor = float(valor)
+                # Convertendo o valor para float
+                valor = float(valor)
 
-        # Busca a conta de origem e a conta de destino
-        conta_origem_doc = contas.find_one({'conta': conta_origem})
-        conta_destino_doc = contas.find_one({'conta': conta_destino})
+                # Busca a conta de origem e a conta de destino
+                conta_origem_doc = contas.find_one({'conta': conta_origem})
+                conta_destino_doc = contas.find_one({'conta': conta_destino})
 
-        if conta_origem_doc is None or conta_destino_doc is None:
-            print("Conta de origem ou destino não encontrada")
-            return False
+                if conta_origem_doc is not None and conta_destino_doc is not None:
+                    saldo_origem = conta_origem_doc.get('saldo')
+                    saldo_destino = conta_destino_doc.get('saldo')
 
-        saldo_origem = conta_origem_doc.get('saldo')
-        saldo_destino = conta_destino_doc.get('saldo')
+                    if saldo_origem < valor:
+                        print(f"Saldo insuficiente na conta de origem para o banco {db_name} agência {agencia}")
+                        continue  # Passa para a próxima agência
 
-        if saldo_origem < valor:
-            print("Saldo insuficiente na conta de origem")
-            return False
+                    # Atualiza o saldo da conta de origem
+                    novo_saldo_origem = saldo_origem - valor
+                    contas.update_one({'conta': conta_origem}, {'$set': {'saldo': novo_saldo_origem}})
 
-        # Atualiza o saldo da conta de origem
-        novo_saldo_origem = saldo_origem - valor
-        contas.update_one({'conta': conta_origem}, {'$set': {'saldo': novo_saldo_origem}})
+                    # Atualiza o saldo da conta de destino
+                    novo_saldo_destino = saldo_destino + valor
+                    contas.update_one({'conta': conta_destino}, {'$set': {'saldo': novo_saldo_destino}})
 
-        # Atualiza o saldo da conta de destino
-        novo_saldo_destino = saldo_destino + valor
-        contas.update_one({'conta': conta_destino}, {'$set': {'saldo': novo_saldo_destino}})
-
-        print("Transferência realizada com sucesso")
-        return True
+                    print(f"Transferência de {valor} realizada com sucesso para o banco {db_name} agência {agencia}")
+                    return True
+                else:
+                    print(f"Conta de origem ou destino não encontrada no banco {db_name} agência {agencia}")
+        print("Erro: Conta de origem ou destino não encontrada em nenhum banco ou agência")
+        return False
     except Exception as e:
         print(f"Erro ao transferir valores ou atualizar saldos no banco de dados: {e}")
         return False
