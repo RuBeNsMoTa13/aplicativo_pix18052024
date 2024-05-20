@@ -11,9 +11,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Transferência',
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-      ),
+      theme: ThemeData(primarySwatch: Colors.deepPurple),
       home: TransferirScreen(
         contaOrigem: '123456789',
         dados: [],
@@ -25,7 +23,7 @@ class MyApp extends StatelessWidget {
 class TransferirScreen extends StatelessWidget {
   final String contaOrigem;
 
-  const TransferirScreen(
+  TransferirScreen(
       {required this.contaOrigem, required List<Map<String, dynamic>> dados});
 
   @override
@@ -50,8 +48,9 @@ class TransferenciaForm extends StatefulWidget {
 }
 
 class _TransferenciaFormState extends State<TransferenciaForm> {
-  final TextEditingController _valorController = TextEditingController();
-  final TextEditingController _pesquisaController = TextEditingController();
+  late final TextEditingController _valorController = TextEditingController();
+  late final TextEditingController _pesquisaController =
+      TextEditingController();
   String? _contaDestino;
   bool _isLoading = false;
   List<dynamic> _contasDestino = [];
@@ -64,6 +63,7 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
     _pesquisaController.addListener(_filtrarContas);
   }
 
+  // Carrega as contas de destino
   Future<void> _carregarContasDestino() async {
     try {
       final response =
@@ -78,19 +78,16 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
         throw Exception('Erro ao carregar contas de destino');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao carregar contas de destino')),
-      );
+      _mostrarSnackBar('Erro ao carregar contas de destino');
     }
   }
 
+  // Realiza a transferência
   Future<void> _realizarTransferencia() async {
     final valorDigitado = _valorController.text;
 
     if (_contaDestino == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Selecione a conta de destino')),
-      );
+      _mostrarSnackBar('Selecione a conta de destino');
       return;
     }
 
@@ -101,9 +98,7 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
     try {
       final response = await http.post(
         Uri.parse('http://localhost:5000/realizar_transferencia'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'conta_origem': widget.contaOrigem,
           'conta_destino': _contaDestino!,
@@ -112,16 +107,12 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Transferência realizada com sucesso!')),
-        );
+        _mostrarSnackBar('Transferência realizada com sucesso!');
       } else {
         throw Exception('Erro ao realizar a transferência');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao realizar a transferência')),
-      );
+      _mostrarSnackBar('Erro ao realizar a transferência');
     } finally {
       setState(() {
         _isLoading = false;
@@ -129,6 +120,7 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
     }
   }
 
+  // Filtra as contas de destino
   void _filtrarContas() {
     final keyword = _pesquisaController.text.toLowerCase();
     setState(() {
@@ -140,6 +132,12 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
     });
   }
 
+  // Mostra um SnackBar com a mensagem especificada
+  void _mostrarSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -147,9 +145,8 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
         padding: const EdgeInsets.all(20.0),
         child: Card(
           elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -157,37 +154,26 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Sua Conta:',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                Text('Sua Conta:',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                    textAlign: TextAlign.center),
                 SizedBox(height: 8),
-                Text(
-                  'Conta: ${widget.contaOrigem}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                Text('Conta: ${widget.contaOrigem}',
+                    style: TextStyle(fontSize: 16, color: Colors.black),
+                    textAlign: TextAlign.center),
                 SizedBox(height: 20),
                 TextFormField(
                   controller: _pesquisaController,
-                  onChanged: (_) {
-                    _filtrarContas();
-                  },
+                  onChanged: (_) => _filtrarContas(),
                   decoration: InputDecoration(
                     labelText: 'Pesquisar Conta Destino',
                     border: OutlineInputBorder(),
                     labelStyle: TextStyle(color: Colors.black),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black),
-                    ),
+                        borderSide: BorderSide(color: Colors.black)),
                   ),
                 ),
                 SizedBox(height: 20),
@@ -200,17 +186,13 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Text('${item['nome']} - ${item['conta']}',
+                                    style: TextStyle(color: Colors.black)),
+                                SizedBox(width: 30),
                                 Text(
-                                  '${item['nome']} - ${item['conta']}',
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                                SizedBox(
-                                  width: 30,
-                                ),
-                                Text(
-                                  'Banco: ${item['banco']}, Agência: ${item['agencia']}',
-                                  style: TextStyle(color: Colors.purple[900]),
-                                ),
+                                    'Banco: ${item['banco']}, Agência: ${item['agencia']}',
+                                    style:
+                                        TextStyle(color: Colors.purple[900])),
                               ],
                             ),
                           );
@@ -225,8 +207,7 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                           border: OutlineInputBorder(),
                           labelStyle: TextStyle(color: Colors.black),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black),
-                          ),
+                              borderSide: BorderSide(color: Colors.black)),
                         ),
                       )
                     : Text('Nenhuma conta encontrada'),
@@ -238,8 +219,7 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                     labelStyle: TextStyle(color: Colors.black),
                     border: OutlineInputBorder(),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black),
-                    ),
+                        borderSide: BorderSide(color: Colors.black)),
                   ),
                   keyboardType: TextInputType.number,
                 ),
@@ -250,10 +230,7 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                       ? CircularProgressIndicator()
                       : Text(
                           'Transferir',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                          ),
+                          style: TextStyle(fontSize: 18, color: Colors.black),
                         ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurple,
