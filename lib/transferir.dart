@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // Importe esta linha para usar o jsonEncode
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -14,16 +14,19 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
       ),
-      home: TransferirScreen(contaOrigem: '123456789', dados: []),
+      home: TransferirScreen(
+        contaOrigem: '123456789',
+        dados: [],
+      ),
     );
   }
 }
 
 class TransferirScreen extends StatelessWidget {
   final String contaOrigem;
-  final List<dynamic> dados;
 
-  const TransferirScreen({required this.contaOrigem, required this.dados});
+  const TransferirScreen(
+      {required this.contaOrigem, required List<Map<String, dynamic>> dados});
 
   @override
   Widget build(BuildContext context) {
@@ -32,16 +35,15 @@ class TransferirScreen extends StatelessWidget {
         title: Text('Transferência'),
         backgroundColor: Colors.deepPurple,
       ),
-      body: TransferenciaForm(contaOrigem: contaOrigem, dados: dados),
+      body: TransferenciaForm(contaOrigem: contaOrigem),
     );
   }
 }
 
 class TransferenciaForm extends StatefulWidget {
   final String contaOrigem;
-  final List<dynamic> dados;
 
-  const TransferenciaForm({required this.contaOrigem, required this.dados});
+  const TransferenciaForm({required this.contaOrigem});
 
   @override
   State<TransferenciaForm> createState() => _TransferenciaFormState();
@@ -51,6 +53,32 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
   final TextEditingController _valorController = TextEditingController();
   String? _contaDestino;
   bool _isLoading = false;
+  List<dynamic> _contasDestino = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarContasDestino();
+  }
+
+  Future<void> _carregarContasDestino() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:5000/contas_destino'));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _contasDestino = json.decode(response.body);
+        });
+      } else {
+        throw Exception('Erro ao carregar contas de destino');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar contas de destino')),
+      );
+    }
+  }
 
   Future<void> _realizarTransferencia() async {
     final valorDigitado = _valorController.text;
@@ -70,11 +98,9 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
       final response = await http.post(
         Uri.parse('http://localhost:5000/realizar_transferencia'),
         headers: {
-          'Content-Type':
-              'application/json', // Adicione o cabeçalho Content-Type
+          'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          // Use jsonEncode para codificar o corpo da requisição em JSON
           'conta_origem': widget.contaOrigem,
           'conta_destino': _contaDestino!,
           'valor': valorDigitado,
@@ -85,7 +111,6 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Transferência realizada com sucesso!')),
         );
-        // Aqui você pode adicionar lógica adicional, como atualizar dados na interface do usuário.
       } else {
         throw Exception('Erro ao realizar a transferência');
       }
@@ -102,15 +127,6 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
 
   @override
   Widget build(BuildContext context) {
-    // Encontrando as informações da conta de origem
-    Map<String, dynamic>? infoContaOrigem;
-    for (var item in widget.dados) {
-      if (item['conta'] == widget.contaOrigem) {
-        infoContaOrigem = item;
-        break;
-      }
-    }
-
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -119,7 +135,7 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          color: Colors.white, // Card branco
+          color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -136,28 +152,32 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 8),
-                if (infoContaOrigem != null) ...[
-                  Text(
-                    'Conta: ${infoContaOrigem!['conta']}\n'
-                    'Nome: ${infoContaOrigem!['nome']}\n'
-                    'Idade: ${infoContaOrigem!['idade']}\n'
-                    'Saldo: ${infoContaOrigem!['saldo']}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
+                Text(
+                  'Conta: ${widget.contaOrigem}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
                   ),
-                  SizedBox(height: 20),
-                ],
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
                 DropdownButtonFormField<String>(
                   value: _contaDestino,
-                  items: widget.dados.map((dynamic item) {
+                  items: _contasDestino.map((dynamic item) {
                     return DropdownMenuItem<String>(
                       value: item['conta'],
-                      child: Text(
-                        '${item['nome']} - ${item['conta']}',
-                        style: TextStyle(color: Colors.black),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${item['nome']} - ${item['conta']}',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          Text(
+                            'Banco: ${item['banco']}, Agência: ${item['agencia']}',
+                            style: TextStyle(color: Colors.purple[900]),
+                          ),
+                        ],
                       ),
                     );
                   }).toList(),
@@ -193,13 +213,15 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                   onPressed: _isLoading ? null : _realizarTransferencia,
                   child: _isLoading
                       ? CircularProgressIndicator()
-                      : Text('Transferir',
+                      : Text(
+                          'Transferir',
                           style: TextStyle(
                             fontSize: 18,
-                            color: Colors.black, // Texto preto
-                          )),
+                            color: Colors.black,
+                          ),
+                        ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple, // Botão roxo
+                    backgroundColor: Colors.deepPurple,
                     minimumSize: Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
