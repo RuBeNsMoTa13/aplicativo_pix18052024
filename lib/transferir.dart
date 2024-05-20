@@ -51,14 +51,17 @@ class TransferenciaForm extends StatefulWidget {
 
 class _TransferenciaFormState extends State<TransferenciaForm> {
   final TextEditingController _valorController = TextEditingController();
+  final TextEditingController _pesquisaController = TextEditingController();
   String? _contaDestino;
   bool _isLoading = false;
   List<dynamic> _contasDestino = [];
+  List<dynamic> _contasFiltradas = [];
 
   @override
   void initState() {
     super.initState();
     _carregarContasDestino();
+    _pesquisaController.addListener(_filtrarContas);
   }
 
   Future<void> _carregarContasDestino() async {
@@ -69,6 +72,7 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
       if (response.statusCode == 200) {
         setState(() {
           _contasDestino = json.decode(response.body);
+          _contasFiltradas = _contasDestino;
         });
       } else {
         throw Exception('Erro ao carregar contas de destino');
@@ -125,6 +129,17 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
     }
   }
 
+  void _filtrarContas() {
+    final keyword = _pesquisaController.text.toLowerCase();
+    setState(() {
+      _contasFiltradas = _contasDestino.where((item) {
+        final nomeConta = item['nome'].toString().toLowerCase();
+        final conta = item['conta'].toString().toLowerCase();
+        return nomeConta.contains(keyword) || conta.contains(keyword);
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -161,36 +176,13 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 20),
-                DropdownButtonFormField<String>(
-                  value: _contaDestino,
-                  items: _contasDestino.map((dynamic item) {
-                    return DropdownMenuItem<String>(
-                      value: item['conta'],
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${item['nome']} - ${item['conta']}',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                          SizedBox(
-                            width: 30,
-                          ),
-                          Text(
-                            'Banco: ${item['banco']}, Agência: ${item['agencia']}',
-                            style: TextStyle(color: Colors.purple[900]),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _contaDestino = newValue;
-                    });
+                TextFormField(
+                  controller: _pesquisaController,
+                  onChanged: (_) {
+                    _filtrarContas();
                   },
                   decoration: InputDecoration(
-                    labelText: 'Conta Destino',
+                    labelText: 'Pesquisar Conta Destino',
                     border: OutlineInputBorder(),
                     labelStyle: TextStyle(color: Colors.black),
                     focusedBorder: OutlineInputBorder(
@@ -198,6 +190,46 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                     ),
                   ),
                 ),
+                SizedBox(height: 20),
+                _contasFiltradas.isNotEmpty
+                    ? DropdownButtonFormField<String>(
+                        value: _contaDestino,
+                        items: _contasFiltradas.map((dynamic item) {
+                          return DropdownMenuItem<String>(
+                            value: item['conta'],
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${item['nome']} - ${item['conta']}',
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                                SizedBox(
+                                  width: 30,
+                                ),
+                                Text(
+                                  'Banco: ${item['banco']}, Agência: ${item['agencia']}',
+                                  style: TextStyle(color: Colors.purple[900]),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _contaDestino = newValue;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Conta Destino',
+                          border: OutlineInputBorder(),
+                          labelStyle: TextStyle(color: Colors.black),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                        ),
+                      )
+                    : Text('Nenhuma conta encontrada'),
                 SizedBox(height: 20),
                 TextFormField(
                   controller: _valorController,
