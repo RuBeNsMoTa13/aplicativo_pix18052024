@@ -11,15 +11,16 @@ dbs = {
     'sicoob': client['sicoob']
 }
 
-def conta_existe(db, conta):
+def conta_existe(conta):
     # Verifica se a conta existe em todas as agências de todos os bancos
-    for banco in dbs.values():
+    for db_name, db in dbs.items():
         for agencia in range(1, 6):  # Considerando agências de 1 a 5
-            colecao = f'{db.name}_ag{agencia}'
-            contas = banco[colecao]
+            colecao = f'{db_name}_ag{agencia}'
+            contas = db[colecao]
             if contas.find_one({'conta': conta}):
                 return True
     return False
+
 
 @app.route('/<string:banco>/<int:agencia>/dados', methods=['GET'])
 def obter_dados(banco, agencia):
@@ -52,7 +53,7 @@ def realizar_transferencia():
             return jsonify({'error': 'Dados incompletos para realizar a transferência'}), 400
 
         # Verifica se as contas existem em qualquer banco de dados
-        if conta_existe(dbs['itau'], conta_origem) and conta_existe(dbs['itau'], conta_destino):
+        if conta_existe( conta_origem) and conta_existe(conta_destino):
             # Realiza a transferência
             if transferir_valor(conta_origem, conta_destino, valor):
                 return jsonify({'message': 'Transferência realizada com sucesso'}), 200
@@ -106,3 +107,5 @@ def transferir_valor(conta_origem, conta_destino, valor):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+    
