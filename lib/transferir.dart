@@ -166,12 +166,15 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                   items: _contasDestino.map((dynamic item) {
                     return DropdownMenuItem<String>(
                       value: item['conta'],
-                      child: Column(
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             '${item['nome']} - ${item['conta']}',
                             style: TextStyle(color: Colors.black),
+                          ),
+                          SizedBox(
+                            width: 30,
                           ),
                           Text(
                             'Banco: ${item['banco']}, Agência: ${item['agencia']}',
