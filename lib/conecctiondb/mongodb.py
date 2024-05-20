@@ -58,32 +58,54 @@ def realizar_transferencia():
 
 def transferir_valor(conta_origem, conta_destino, valor):
     try:
+        conta_origem_doc = None
+        conta_destino_doc = None
+
+        # Encontrar a conta de origem em todos os bancos e agências
         for db_name, db in dbs.items():
             for agencia in range(1, 6):
                 colecao = f'{db_name}_ag{agencia}'
                 contas = db[colecao]
-                valor = float(valor)
-
                 conta_origem_doc = contas.find_one({'conta': conta_origem})
+                if conta_origem_doc:
+                    break
+            if conta_origem_doc:
+                break
+
+        # Encontrar a conta de destino em todos os bancos e agências
+        for db_name, db in dbs.items():
+            for agencia in range(1, 6):
+                colecao = f'{db_name}_ag{agencia}'
+                contas = db[colecao]
                 conta_destino_doc = contas.find_one({'conta': conta_destino})
+                if conta_destino_doc:
+                    break
+            if conta_destino_doc:
+                break
 
-                if conta_origem_doc is not None and conta_destino_doc is not None:
-                    saldo_origem = conta_origem_doc.get('saldo')
-                    saldo_destino = conta_destino_doc.get('saldo')
+        if conta_origem_doc is not None and conta_destino_doc is not None:
+            saldo_origem = conta_origem_doc.get('saldo')
+            saldo_destino = conta_destino_doc.get('saldo')
 
-                    if saldo_origem < valor:
-                        continue
+            valor = float(valor)
+            if saldo_origem < valor:
+                return False  # Saldo insuficiente
 
-                    novo_saldo_origem = saldo_origem - valor
-                    contas.update_one({'conta': conta_origem}, {'$set': {'saldo': novo_saldo_origem}})
+            novo_saldo_origem = saldo_origem - valor
+            novo_saldo_destino = saldo_destino + valor
 
-                    novo_saldo_destino = saldo_destino + valor
-                    contas.update_one({'conta': conta_destino}, {'$set': {'saldo': novo_saldo_destino}})
+            # Atualizar saldo na conta de origem
+            contas.update_one({'conta': conta_origem}, {'$set': {'saldo': novo_saldo_origem}})
 
-                    return True
-        return False
+            # Atualizar saldo na conta de destino
+            contas.update_one({'conta': conta_destino}, {'$set': {'saldo': novo_saldo_destino}})
+
+            return True  # Transferência bem-sucedida
+        else:
+            return False  # Conta de origem ou destino não encontrada
     except Exception as e:
-        return False
+        return False  # Erro durante a transferência
+
 
 @app.route('/contas_destino', methods=['GET'])
 def obter_contas_destino():
