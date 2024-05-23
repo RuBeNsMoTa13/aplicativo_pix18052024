@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:intl/intl.dart'; // Importe a biblioteca intl para usar DateFormat
+import 'package:intl/intl.dart'; 
 
 class TransferirScreen extends StatelessWidget {
   final String contaOrigem;
@@ -47,7 +47,6 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
     _pesquisaController.addListener(_filtrarContas);
   }
 
-  // Carrega as contas de destino
   Future<void> _carregarContasDestino() async {
     try {
       final response =
@@ -66,7 +65,6 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
     }
   }
 
-  // Realiza a transferência
   Future<void> _realizarTransferencia() async {
     final valorDigitado = _valorController.text;
 
@@ -96,10 +94,10 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
           widget.contaOrigem,
           _contaDestino!,
           valorDigitado,
-          _obterDataHoraAtual(), // Adicione a data e hora aqui
+          _obterDataHoraAtual(), 
           _contasDestino
                   .firstWhere((element) => element['conta'] == _contaDestino)[
-              'chave_pix'], // Adicione a chave PIX aqui
+              'chave_pix'], 
         );
       } else {
         throw Exception('Erro ao realizar a transferência');
@@ -113,7 +111,6 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
     }
   }
 
-  // Filtra as contas de destino
   void _filtrarContas() {
     final keyword = _pesquisaController.text.toLowerCase();
     setState(() {
@@ -128,13 +125,11 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
     });
   }
 
-  // Mostra um SnackBar com a mensagem especificada
   void _mostrarSnackBar(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
-  // Exibe o comprovante de transferência em um AlertDialog
   void _exibirComprovante(String contaOrigem, String contaDestino,
       String valorTransferido, String dataHora, String chavePix) {
     showDialog(
@@ -148,8 +143,8 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                 Text('Conta de Origem: $contaOrigem'),
                 Text('Conta de Destino: $contaDestino'),
                 Text('Valor Transferido: R\$ $valorTransferido'),
-                Text('Data e Hora: $dataHora'), // Mostrar a data e hora aqui
-                Text('Chave PIX: $chavePix'), // Mostrar a chave PIX aqui
+                Text('Data e Hora: $dataHora'),
+                Text('Chave PIX: $chavePix'), 
                 Text(
                     'Saldo: R\$ ${widget.dados.firstWhere((element) => element['conta'] == widget.contaOrigem)['saldo']}'),
                 Text(
@@ -170,7 +165,6 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
     );
   }
 
-  // Método para obter a data e hora atual formatada
   String _obterDataHoraAtual() {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('dd/MM/yyyy HH:mm:ss').format(now);

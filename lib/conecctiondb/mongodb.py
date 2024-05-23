@@ -68,7 +68,7 @@ def transferir_valor(conta_origem, conta_destino, valor):
         conta_origem_doc = None
         conta_destino_doc = None
 
-        # Encontrar a conta de origem em todos os bancos e agências
+        
         for db_name, db in dbs.items():
             for agencia in range(1, 6):
                 colecao = f'{db_name}_ag{agencia}'
@@ -79,7 +79,7 @@ def transferir_valor(conta_origem, conta_destino, valor):
             if conta_origem_doc:
                 break
 
-        # Encontrar a conta de destino em todos os bancos e agências
+        
         for db_name, db in dbs.items():
             for agencia in range(1, 6):
                 colecao = f'{db_name}_ag{agencia}'
@@ -96,22 +96,22 @@ def transferir_valor(conta_origem, conta_destino, valor):
 
             valor = float(valor)
             if saldo_origem < valor:
-                return False  # Saldo insuficiente
+                return False  
 
             novo_saldo_origem = saldo_origem - valor
             novo_saldo_destino = saldo_destino + valor
 
-            # Atualizar saldo na conta de origem
+            
             contas.update_one({'conta': conta_origem}, {'$set': {'saldo': novo_saldo_origem}})
 
-            # Atualizar saldo na conta de destino
+            
             contas.update_one({'conta': conta_destino}, {'$set': {'saldo': novo_saldo_destino}})
 
-            return True  # Transferência bem-sucedida
+            return True  
         else:
-            return False  # Conta de origem ou destino não encontrada
+            return False  
     except Exception as e:
-        return False  # Erro durante a transferência
+        return False  
 
 
 @app.route('/contas_destino', methods=['GET'])
@@ -125,7 +125,7 @@ def obter_contas_destino():
                 conta['_id'] = str(conta['_id'])
                 conta['banco'] = db_name
                 conta['agencia'] = agencia
-                conta['nome_banco'] = db_name.capitalize()  # Adiciona o nome do banco com a primeira letra maiúscula
+                conta['nome_banco'] = db_name.capitalize()  
                 if 'chave_pix' in conta:
                     conta['chave_pix'] = conta['chave_pix']
                 contas_destino.append(conta)
