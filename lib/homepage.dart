@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'transferir.dart'; 
+import 'transferir.dart';
 
 class HomePage extends StatelessWidget {
   final List<Map<String, dynamic>> dados;
@@ -28,7 +28,7 @@ class HomePage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,6 +42,7 @@ class HomePage extends StatelessWidget {
                       _buildAgenciaDetails(agencia),
                     ],
                   ),
+                  SizedBox(width: 50),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -69,6 +70,10 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                   ),
+                  SizedBox(width: 20),
+                  Icon(Icons.edit),
+                  SizedBox(width: 20),
+                  Icon(Icons.delete)
                 ],
               ),
             ),

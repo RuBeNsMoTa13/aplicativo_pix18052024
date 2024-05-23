@@ -1,3 +1,4 @@
+import 'package:aplicativo_pix/cadastrar.dart';
 import 'package:flutter/material.dart';
 import 'agencias.dart';
 
@@ -192,6 +193,14 @@ class SelecionarAgenciaScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => CadastrarPage()));
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Colors.green,
       ),
     );
   }
