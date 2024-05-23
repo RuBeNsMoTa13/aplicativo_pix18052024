@@ -96,6 +96,9 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
           _contaDestino!,
           valorDigitado,
           _obterDataHoraAtual(), // Adicione a data e hora aqui
+          _contasDestino
+                  .firstWhere((element) => element['conta'] == _contaDestino)[
+              'chave_pix'], // Adicione a chave PIX aqui
         );
       } else {
         throw Exception('Erro ao realizar a transferência');
@@ -132,7 +135,7 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
 
   // Exibe o comprovante de transferência em um AlertDialog
   void _exibirComprovante(String contaOrigem, String contaDestino,
-      String valorTransferido, String dataHora) {
+      String valorTransferido, String dataHora, String chavePix) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -143,9 +146,9 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
               children: <Widget>[
                 Text('Conta de Origem: $contaOrigem'),
                 Text('Conta de Destino: $contaDestino'),
-                Text('Conta de Destino: $contaDestino'),
                 Text('Valor Transferido: R\$ $valorTransferido'),
                 Text('Data e Hora: $dataHora'), // Mostrar a data e hora aqui
+                Text('Chave PIX: $chavePix'), // Mostrar a chave PIX aqui
               ],
             ),
           ),
