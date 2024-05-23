@@ -127,7 +127,10 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
       _contasFiltradas = _contasDestino.where((item) {
         final nomeConta = item['nome'].toString().toLowerCase();
         final conta = item['conta'].toString().toLowerCase();
-        return nomeConta.contains(keyword) || conta.contains(keyword);
+        final chavePix = item['chave_pix']?.toString().toLowerCase() ?? '';
+        return nomeConta.contains(keyword) ||
+            conta.contains(keyword) ||
+            chavePix.contains(keyword);
       }).toList();
     });
   }
@@ -193,6 +196,9 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                                     'Banco: ${item['banco']}, Agência: ${item['agencia']}',
                                     style:
                                         TextStyle(color: Colors.purple[900])),
+                                if (item['chave_pix'] != null)
+                                  Text('  Chave PIX: ${item['chave_pix']}',
+                                      style: TextStyle(color: Colors.amber)),
                               ],
                             ),
                           );

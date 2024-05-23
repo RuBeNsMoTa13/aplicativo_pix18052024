@@ -49,7 +49,7 @@ def realizar_transferencia():
 
         if conta_existe(conta_origem) and conta_existe(conta_destino):
             if transferir_valor(conta_origem, conta_destino, valor):
-                print("Transferência realizada com sucesso para Conta ", conta_destino )
+                print("Transferência realizada  com sucesso de R$",valor," para Conta ", conta_destino )
                 return jsonify({'message': 'Transferência realizada com sucesso'}), 200
             else:
                 print("Erro ao transferir valores ou atualizar saldos")
@@ -126,8 +126,11 @@ def obter_contas_destino():
                 conta['banco'] = db_name
                 conta['agencia'] = agencia
                 conta['nome_banco'] = db_name.capitalize()  # Adiciona o nome do banco com a primeira letra maiúscula
+                if 'chave_pix' in conta:
+                    conta['chave_pix'] = conta['chave_pix']
                 contas_destino.append(conta)
     return jsonify(contas_destino)
+
 
 
 if __name__ == '__main__':
