@@ -24,7 +24,7 @@ class SelecionarAgenciaScreen extends StatelessWidget {
             ),
             SizedBox(height: 40),
             Text(
-              'Selecione a agência desejada:',
+              'Selecione o Banco desejado:',
               style: TextStyle(
                 fontSize: 24,
                 color: Colors.white,
