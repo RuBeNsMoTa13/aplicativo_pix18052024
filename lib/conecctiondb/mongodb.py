@@ -44,17 +44,24 @@ def realizar_transferencia():
         valor = data.get('valor')
 
         if not conta_origem or not conta_destino or not valor:
+            print("Dados incompletos para realizar a transferência")
             return jsonify({'error': 'Dados incompletos para realizar a transferência'}), 400
 
         if conta_existe(conta_origem) and conta_existe(conta_destino):
             if transferir_valor(conta_origem, conta_destino, valor):
+                print("Transferência realizada com sucesso para Conta ", conta_destino )
                 return jsonify({'message': 'Transferência realizada com sucesso'}), 200
             else:
+                print("Erro ao transferir valores ou atualizar saldos")
                 return jsonify({'error': 'Erro ao transferir valores ou atualizar saldos'}), 500
         else:
+            print("Uma ou ambas as contas não existem")
             return jsonify({'error': 'Uma ou ambas as contas não existem'}), 404
     except Exception as e:
+        print(f"Erro interno no servidor: {str(e)}")
         return jsonify({'error': 'Erro interno no servidor'}), 500
+
+
 
 def transferir_valor(conta_origem, conta_destino, valor):
     try:
