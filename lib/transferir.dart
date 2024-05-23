@@ -5,9 +5,9 @@ import 'package:intl/intl.dart'; // Importe a biblioteca intl para usar DateForm
 
 class TransferirScreen extends StatelessWidget {
   final String contaOrigem;
+  final List<dynamic> dados;
 
-  TransferirScreen(
-      {required this.contaOrigem, required List<Map<String, dynamic>> dados});
+  TransferirScreen({required this.contaOrigem, required this.dados});
 
   @override
   Widget build(BuildContext context) {
@@ -16,15 +16,16 @@ class TransferirScreen extends StatelessWidget {
         title: Text('Transferência'),
         backgroundColor: Colors.deepPurple,
       ),
-      body: TransferenciaForm(contaOrigem: contaOrigem),
+      body: TransferenciaForm(contaOrigem: contaOrigem, dados: dados),
     );
   }
 }
 
 class TransferenciaForm extends StatefulWidget {
   final String contaOrigem;
+  final List<dynamic> dados;
 
-  const TransferenciaForm({required this.contaOrigem});
+  const TransferenciaForm({required this.contaOrigem, required this.dados});
 
   @override
   State<TransferenciaForm> createState() => _TransferenciaFormState();
@@ -149,6 +150,10 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                 Text('Valor Transferido: R\$ $valorTransferido'),
                 Text('Data e Hora: $dataHora'), // Mostrar a data e hora aqui
                 Text('Chave PIX: $chavePix'), // Mostrar a chave PIX aqui
+                Text(
+                    'Saldo: R\$ ${widget.dados.firstWhere((element) => element['conta'] == widget.contaOrigem)['saldo']}'),
+                Text(
+                    'Nome: ${widget.dados.firstWhere((element) => element['conta'] == widget.contaOrigem)['nome']}'),
               ],
             ),
           ),
@@ -195,9 +200,13 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
                         color: Colors.black),
                     textAlign: TextAlign.center),
                 SizedBox(height: 8),
-                Text('Conta: ${widget.contaOrigem}',
-                    style: TextStyle(fontSize: 16, color: Colors.black),
-                    textAlign: TextAlign.center),
+                Text(
+                  'Nome: ${widget.dados.firstWhere((element) => element['conta'] == widget.contaOrigem)['nome']}\n'
+                  'Conta: ${widget.contaOrigem}\n'
+                  'Saldo: R\$ ${widget.dados.firstWhere((element) => element['conta'] == widget.contaOrigem)['saldo']}',
+                  style: TextStyle(fontSize: 16, color: Colors.black),
+                  textAlign: TextAlign.center,
+                ),
                 SizedBox(height: 20),
                 TextFormField(
                   controller: _pesquisaController,
