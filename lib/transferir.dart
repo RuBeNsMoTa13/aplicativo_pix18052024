@@ -1,24 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Transferência',
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
-      home: TransferirScreen(
-        contaOrigem: '123456789',
-        dados: [],
-      ),
-    );
-  }
-}
+import 'package:intl/intl.dart'; // Importe a biblioteca intl para usar DateFormat
 
 class TransferirScreen extends StatelessWidget {
   final String contaOrigem;
@@ -108,6 +91,12 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
 
       if (response.statusCode == 200) {
         _mostrarSnackBar('Transferência realizada com sucesso!');
+        _exibirComprovante(
+          widget.contaOrigem,
+          _contaDestino!,
+          valorDigitado,
+          _obterDataHoraAtual(), // Adicione a data e hora aqui
+        );
       } else {
         throw Exception('Erro ao realizar a transferência');
       }
@@ -139,6 +128,45 @@ class _TransferenciaFormState extends State<TransferenciaForm> {
   void _mostrarSnackBar(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  // Exibe o comprovante de transferência em um AlertDialog
+  void _exibirComprovante(String contaOrigem, String contaDestino,
+      String valorTransferido, String dataHora) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Comprovante de Transferência'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Conta de Origem: $contaOrigem'),
+                Text('Conta de Destino: $contaDestino'),
+                Text('Conta de Destino: $contaDestino'),
+                Text('Valor Transferido: R\$ $valorTransferido'),
+                Text('Data e Hora: $dataHora'), // Mostrar a data e hora aqui
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Fechar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Método para obter a data e hora atual formatada
+  String _obterDataHoraAtual() {
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('dd/MM/yyyy HH:mm:ss').format(now);
+    return formattedDate;
   }
 
   @override
